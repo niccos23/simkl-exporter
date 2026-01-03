@@ -1,6 +1,8 @@
-import os
+
 import json
+import os
 import requests
+from datetime import datetime
 from dotenv import load_dotenv
 
 # 1. Load the keys
@@ -49,8 +51,10 @@ def export_simkl_data():
         else:
             print(f"  > Error {response.status_code}: {response.text}")
 
+    today = datetime.now().strftime("%Y-%m-%d")
+
     # Save to a local file
-    filename = "simkl_export.json"
+    filename = f"simkl_export_{today}.json"
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(full_export, f, indent=4)
     
