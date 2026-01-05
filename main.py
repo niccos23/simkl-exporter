@@ -1,7 +1,7 @@
-
 import json
 import os
 import requests
+import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -33,8 +33,16 @@ def export_simkl_data():
     }
 
     full_export = {}
+    
+    today = datetime.now().strftime("%Y-%m-%d")
 
-    print(f"Starting Simkl data export using Client ID: {CLIENT_ID[:5]}...")
+    stats = {
+        "movies": 0,
+        "tv": 0,
+        "anime": 0
+    }
+
+    print(f"Starting Simkl data export for [{today}] using Client ID: {CLIENT_ID[:5]}...")
 
     # Iterate through our map
     for url_slug, json_key in media_map.items():
@@ -45,20 +53,50 @@ def export_simkl_data():
             data = response.json()
             full_export[url_slug] = data
             
-            # Count the items using the CORRECT key
-            item_count = len(data.get(json_key, []))
+            items_list = data.get(json_key, [])
+            item_count = len(items_list)
             print(f"  > Found {item_count} items.")
+
+            if url_slug in stats:
+                stats[url_slug] = item_count
+            
+            if items_list and len(items_list) > 0:
+                 # 1. Convert the raw list of dictionaries into a Pandas DataFrame (a table)
+                df = pd.DataFrame(items_list)
+                
+                # 2. Create a filename, e.g., "simkl_movies_2025-01-04.csv"
+                csv_filename = f"simkl_{url_slug}_{today}.csv"
+                
+                # 3. Save the dataframe to a CSV file without the index numbers (0,1,2...) on the left
+                df.to_csv(csv_filename, index=False, encoding='utf-8')
+                print(f"  > Saved CSV: {csv_filename}")
+            # ----------------------------
         else:
             print(f"  > Error {response.status_code}: {response.text}")
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    # --- Final JSON Save (Cleanup) ---
+    # We already calculated 'today' at the start, so just use it here.
+    json_filename = f"simkl_master_export_{today}.json"
 
-    # Save to a local file
-    filename = f"simkl_export_{today}.json"
-    with open(filename, "w", encoding="utf-8") as f:
+    with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(full_export, f, indent=4)
     
-    print(f"\nSuccess! Data exported to {filename}")
+    print(f"\nSuccess! Master JSON backup saved to {json_filename}")
+    print("Individual CSV files have also been created in this folder.")
+
+    # --- NEW: Final Statistics Dashboard ---
+    total_items = stats['movies'] + stats['tv'] + stats['anime']
+
+    print(f"\n{'='*30}")
+    print(f"📊  YOUR SIMKL STATS DASHBOARD")
+    print(f"{'='*30}")
+    print(f"🎬  Movies:      {stats['movies']}")
+    print(f"📺  TV Shows:    {stats['tv']}")
+    print(f"🍥  Anime:       {stats['anime']}")
+    print(f"{'-'*30}")
+    print(f"🏆  GRAND TOTAL: {total_items} Items")
+    print(f"{'='*30}\n")
+    # ---------------------------------------
 
 if __name__ == "__main__":
     export_simkl_data()
