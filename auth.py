@@ -8,7 +8,7 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("SIMKL_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SIMKL_CLIENT_SECRET")
-REDIRECT_URI = "https://simkl.com"
+REDIRECT_URI = "http://localhost:8000/callback"
 
 def get_new_token():
     if not CLIENT_ID or not CLIENT_SECRET:

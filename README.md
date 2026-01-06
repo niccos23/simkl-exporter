@@ -19,6 +19,11 @@ Unlike other tools, this script handles large libraries and Simkl's specific API
 2. **Install Dependencies**  
    pip install \-r requirements.txt
 
+If needed
+## 📖 Setup Guide
+
+New to this tool? Follow our step-by-step **[Simkl API Setup Guide](docs/simkl_setup_guide.md)** to get your API keys and configure your environment.
+
 3. Setup Credentials  
    Create a .env file in the project folder with your Simkl keys.  
    (See env.example if available or use the format below):  
